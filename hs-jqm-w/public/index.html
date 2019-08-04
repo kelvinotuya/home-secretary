@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Home Secretary App</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css"/>
+<style type="text/css"> 
+.ui-mobile [data-role=header],.ui-mobile [data-role=footer]{
+background-color: rgba(0, 89, 187, 0.71);
+color: beige;
+text-shadow: 1px 1px 12px #000;
+font-size: 15px;
+}
+
+/*form label,legend
+{
+color:#123456;
+}*/
+
+p{
+text-align:center;
+}
+span{
+color:red;
+}
+
+.small_time {
+    width: 150px !important;
+}
+
+.w100{
+    width: 100px;
+}
+
+</style>
+<!-- <link rel="stylesheet" href="/css/jquery-mobile-custom.css"/> -->
+<script src="http://code.jquery.com/jquery-2.1.3.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.3.3/firebase.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.js"></script>   
+<!-- <script src="/js/jquery-mobile-custom.js"></script> -->
+
+</head>
+
+<body>
+<!-------------- First page for form ----------->
+<div data-role="page">
+
+<!-------------- First page header ----------->
+<div data-role="header">
+<h2>Home Secretary</h2>
+</div>
+<div data-role="navbar" data-grid="c">
+    <ul>
+        <li><a href="#page" class="ui-btn-active">Today</a></li>
+        <li><a href="#pagetwo">All Tasks</a></li>
+        <li><a href="#">Calender</a></li>
+        <li><a id="logout" href="#">Logout</a></li>
+    </ul>
+    <a class="user-text"></a>
+    
+</div><!-- /navbar -->
+
+<!-------------- First page main content ----------->
+<div data-role="main" class="ui-content">
+    <form method="post" action="#pagetwo" data-ajax="false">
+        <legend>Add Task or Event:</legend>
+        <fieldset data-role="controlgroup">
+        <label for="text">Item</label>
+        <input type="text" data-mini="true" name="item" id="item" placeholder="item">
+        <label for="textarea">Description</label>
+        <textarea name="description" data-mini="true" id="description" placeholder="Description"></textarea>
+    <div class="ui-grid-b">
+        <div class="ui-block-a">
+        <label for="date">Start</label>
+        <input data-wrapper-class="small_time" type="date" name="date" data-mini="true" id="datepicker" value="">
+        </div>
+        <div class="ui-block-b">
+        
+        <label for="time_1">Time</label>
+        <input data-wrapper-class="small_time" type="time" data-clear-btn="false" name="time_1" data-mini="true" id="time_1" value=" ">
+    </div>
+
+    <div class="ui-block-c">
+        <label for="slider">Completed</label>
+        <select name="slider" id="slider" data-role="slider" data-mini="true">
+            <option value="off">No</option>
+            <option value="on" selected="">Yes</option>
+        </select>
+    </div>
+    </div>
+        </fieldset>
+        <input class="sendToFireBase" type="button" data-inline="true" data-inline value="Add" data-theme="b" data-mini="true">
+    </form>
+
+    
+    <table data-role="table"  data-filter="true" data-input="#filterTable-input" class="ui-responsive todoList table">
+    <thead>
+        <tr>
+            <th class="w100" data-priority="1">Title</th>
+            <th class="w100" data-priority="persist">Description</th>
+            <th class="w100" data-priority="2">Date</th>
+            <th class="w100" data-priority="3">Time</abbr></th>
+            <th class="w100" data-priority="4">Completed</th>
+            <th class="w100" data-priority="4">Delete</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+       </thead>
+   </table>
+   
+    <div data-role="footer" data-id="foo1" data-position="fixed">
+    <div data-role="navbar">
+        <ul>
+            <li><a href="a.html" class="ui-btn-active ui-state-persist" >Members</a></li>
+            <li><a href="b.html" class="ui-btn-active ui-state-persist">Jobs</a></li>
+            <li><a href="c.html" class="ui-btn-active ui-state-persist">Details</a></li>
+            <li><a href="d.html" class="ui-btn-active ui-state-persist">Ledger</a></li>
+        </ul>
+    </div><!-- /navbar -->
+</div><!-- /footer -->
+
+<!-- Javascript code to connect to firebase realtime database -->
+<script>
+    $(document).ready(function(){
+
+    var firebaseConfig = {
+        apiKey: "AIzaSyC8QKBjqv_wv_ViIYNrxnRMPjNublFVtlg",
+        authDomain: "home-secretary-6309c.firebaseapp.com",
+        databaseURL: "https://home-secretary-6309c.firebaseio.com",
+        projectId: "home-secretary-6309c",
+        storageBucket: "",
+        messagingSenderId: "140100657656",
+        appId: "1:140100657656:web:c06fe7af584b5fd1"
+   };
+        
+    // Initialize Firebase,
+    firebase.initializeApp(firebaseConfig);
+
+    var current_user = "";
+    console.log(firebase);
+
+    $(".sendToFireBase").click(function(){
+
+        var item = $("#item").val();
+        var description = $("#description").val();
+         var datepicker = $("#datepicker").val();
+          var time_1 = $("#time_1").val();
+          var slider= $("#slider").val();
+
+
+          var payload = {
+                item : item,
+                description : description,
+                date : datepicker,
+                time : time_1,
+                completed : true
+            };
+          console.log('payload', payload);
+        var todoid = firebase.database().ref().child("users").child("todos").push(
+            payload
+        );
+        console.log(todoid);
+
+        $("#item").val('');
+        $("#description").val('');
+        $("#datepicker").val();
+        $("#time_1").val();
+        $("#slider").val();
+    })
+
+    var todoRef = firebase.database().ref().child("users").child("todos");
+    todoRef.on("value", function(snapshot){
+
+        var $parent = $(".todoList").children("tbody");
+
+        $parent.html('');
+
+        snapshot.forEach(function(item){
+
+            console.log(item, item.val());
+            var completed = item.val().completed == true ? "checked" : "";
+
+            var item_elem = "<td>" + item.val().item + "</td>";
+            var description_elem = "<td>" + item.val().description + "</td>";
+            var datepicker_elem = "<td>" + item.val().datepicker + "</td>";
+            var completed_elem = "<td class='text-center'><input data-key='" + item.key + "' type='checkbox' class='switchery-plugin' " + completed + "/></td>";
+            var removeBtn_elem = "<td class='text-center'><button data-key='" + item.key + "' class='btn btn-danger btn-block removeBtn'>Delete</button></td>";
+
+            $parent.append("<tr>" + item_elem + description_elem + completed_elem + removeBtn_elem + "</tr>");
+
+        })
+
+        // $(".switchery-plugin").each(function(){
+        //     new Switchery(this);
+        // })
+    });
+
+
+    $("body").on("click", ".removeBtn", function(){
+
+        var $key = $(this).data("key");
+
+        firebase.database().ref("users/" + current_user).child("todos").child($key).remove();
+
+    });
+
+
+    $("body").on("change", ".switchery-plugin", function(){
+
+        var $completed = $(this).prop("checked");
+
+        var $key = $(this).data("key");
+
+        firebase.database().ref("users/" + current_user).child("todos").child($key).child("completed").set($completed);
+
+
+    })
+
+
+});
+</script>
+</div>
+
+<!-------------------------------------------------------------
+End of First page
+-------------------------------------------------------------->
+<!-------------- Second page ----------->
+<div data-role="page" id="pagetwo">
+<!-------------- Second page header ----------->
+<div data-role="header">
+<h1>JQuery Mobile Form</h1>
+</div>
+<!-------------- Second page main content ----------->
+<div data-role="main" class="ui-content">
+<h2>Form Submitted Successfully...!!</h2>
+
+ <div class="row">
+        <div class="col-md-12 well">
+            <h4>Event & Tasks</h4>
+<!-- <table data-role="table"  data-filter="true" data-input="#filterTable-input" class="ui-responsive todoList table">
+    <thead>
+        <tr>
+            <th class="w100" data-priority="1">Title</th>
+            <th class="w100" data-priority="persist">Description</th>
+            <th class="w100" data-priority="2">Date</th>
+            <th class="w100" data-priority="3">Time</abbr></th>
+            <th class="w100" data-priority="4">Completed</th>
+            <th class="w100" data-priority="4">Delete</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+       </thead>
+   </table> -->
+        </div>
+    </div>
+
+ 
+</div>
+</div>
+<!-------------------------------------------------------------
+End of Second page
+-------------------------------------------------------------->
+</body>
+</html>
+
+
+    
